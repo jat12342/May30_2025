@@ -9,34 +9,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Java (required for Android SDK)
+      - name: Setup Java JDK 11
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '11'  # Ya jo bhi version buildozer recommend karta ho
+          java-version: '11'
 
-      - name: Install Android SDK command line tools
+      - name: Accept Android SDK licenses
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip
-          mkdir -p $HOME/android-sdk/cmdline-tools
-          cd $HOME/android-sdk/cmdline-tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-          unzip cmdline-tools.zip
-          mv cmdline-tools latest
-          rm cmdline-tools.zip
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
 
-      - name: Set ANDROID_HOME and PATH
+      - name: Install required build tools and platforms
         run: |
-          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
-          echo "$HOME/android-sdk/build-tools/36.0.0" >> $GITHUB_PATH
-
-      - name: Accept licenses and install build-tools, platform tools, platforms
-        run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-33" "build-tools;36.0.0"
+          sdkmanager "build-tools;36.0.0" "platforms;android-33" 
 
       - name: Build APK
         uses: digreatbrian/buildozer-action@v2
